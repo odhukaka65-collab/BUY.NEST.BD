@@ -1,0 +1,39 @@
+
+name: Build Buy Nest BD APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Extract Android project
+        run: |
+          unzip -o BuyNestBD_Android_Starter.zip -d project
+          cp -r project/* .
+          cp -r project/.[!.]* . 2>/dev/null || true
+
+      - name: Build APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: BuyNestBD-APK
+          path: app/build/outputs/apk/debug/*.apk
